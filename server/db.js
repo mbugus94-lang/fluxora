@@ -151,6 +151,83 @@ function initDatabase() {
     )
   `);
 
+  // Nutrition plans table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS nutrition_plans (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      clientId INTEGER NOT NULL,
+      professionalId INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT,
+      dailyCalories INTEGER,
+      proteinGrams INTEGER,
+      carbsGrams INTEGER,
+      fatGrams INTEGER,
+      meals TEXT,
+      status TEXT DEFAULT 'active',
+      startDate TEXT,
+      endDate TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE,
+      FOREIGN KEY (professionalId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Nutrition logs table (daily food intake)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS nutrition_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      clientId INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      mealType TEXT NOT NULL,
+      foodName TEXT NOT NULL,
+      portionSize TEXT,
+      calories INTEGER,
+      protein REAL,
+      carbs REAL,
+      fat REAL,
+      notes TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Notification preferences table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS notification_prefs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      clientId INTEGER NOT NULL,
+      emailEnabled INTEGER DEFAULT 1,
+      whatsappEnabled INTEGER DEFAULT 0,
+      telegramEnabled INTEGER DEFAULT 0,
+      phone TEXT,
+      chatId TEXT,
+      appointmentReminders INTEGER DEFAULT 1,
+      progressReminders INTEGER DEFAULT 1,
+      marketingMessages INTEGER DEFAULT 0,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Notification logs table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS notification_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      clientId INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      message TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      error TEXT,
+      sentAt TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (clientId) REFERENCES clients(id) ON DELETE CASCADE
+    )
+  `);
+
   console.log('Tables created successfully');
 }
 
@@ -657,8 +734,165 @@ function insertAnalyticsEvents(professionalId) {
         } else {
           eventCount++;
           if (eventCount === events.length) {
-            console.log('Sample data insertion complete!');
-            console.log('Database is ready to use');
+            insertNutritionPlans(professionalId);
+          }
+        }
+      }
+    );
+  });
+}
+
+// Insert sample nutrition plans
+function insertNutritionPlans(professionalId) {
+  console.log('Inserting sample nutrition plans...');
+
+  const nutritionPlans = [
+    {
+      professionalId: professionalId,
+      clientId: 1,
+      name: 'Weight Loss Meal Plan',
+      description: 'Calorie-controlled meal plan for weight loss',
+      dailyCalories: 1800,
+      proteinGrams: 150,
+      carbsGrams: 180,
+      fatGrams: 60,
+      meals: JSON.stringify({
+        breakfast: { name: 'Oatmeal with protein', calories: 400, protein: 30, carbs: 50, fat: 10 },
+        lunch: { name: 'Grilled chicken salad', calories: 500, protein: 45, carbs: 30, fat: 20 },
+        snack: { name: 'Greek yogurt', calories: 150, protein: 15, carbs: 10, fat: 5 },
+        dinner: { name: 'Salmon with vegetables', calories: 550, protein: 40, carbs: 40, fat: 25 },
+        snack2: { name: 'Apple with almond butter', calories: 200, protein: 5, carbs: 25, fat: 10 }
+      }),
+      status: 'active',
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date(Date.now() + 7776000000).toISOString().slice(0, 10),
+    },
+    {
+      professionalId: professionalId,
+      clientId: 2,
+      name: 'Balanced Wellness Plan',
+      description: 'Balanced nutrition for overall health and flexibility',
+      dailyCalories: 2000,
+      proteinGrams: 100,
+      carbsGrams: 250,
+      fatGrams: 70,
+      meals: JSON.stringify({
+        breakfast: { name: 'Green smoothie', calories: 350, protein: 20, carbs: 45, fat: 12 },
+        lunch: { name: 'Quinoa bowl with veggies', calories: 550, protein: 25, carbs: 70, fat: 18 },
+        snack: { name: 'Mixed nuts', calories: 180, protein: 6, carbs: 8, fat: 16 },
+        dinner: { name: 'Tofu stir-fry', calories: 500, protein: 30, carbs: 55, fat: 20 },
+        snack2: { name: 'Fruit salad', calories: 200, protein: 2, carbs: 50, fat: 0 }
+      }),
+      status: 'active',
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date(Date.now() + 6048000000).toISOString().slice(0, 10),
+    },
+    {
+      professionalId: professionalId,
+      clientId: 3,
+      name: 'Muscle Building Nutrition',
+      description: 'High protein nutrition for muscle growth',
+      dailyCalories: 3000,
+      proteinGrams: 220,
+      carbsGrams: 350,
+      fatGrams: 85,
+      meals: JSON.stringify({
+        breakfast: { name: 'Eggs and oatmeal', calories: 600, protein: 35, carbs: 60, fat: 22 },
+        lunch: { name: 'Chicken and rice', calories: 750, protein: 60, carbs: 80, fat: 20 },
+        snack: { name: 'Protein shake', calories: 250, protein: 50, carbs: 10, fat: 5 },
+        dinner: { name: 'Beef and potatoes', calories: 800, protein: 65, carbs: 70, fat: 30 },
+        snack2: { name: 'Cottage cheese', calories: 200, protein: 25, carbs: 8, fat: 8 }
+      }),
+      status: 'active',
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: new Date(Date.now() + 12096000000).toISOString().slice(0, 10),
+    },
+  ];
+
+  let planCount = 0;
+  nutritionPlans.forEach((plan) => {
+    db.run(
+      `INSERT INTO nutrition_plans (professionalId, clientId, name, description, dailyCalories, proteinGrams, carbsGrams, fatGrams, meals, status, startDate, endDate)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [plan.professionalId, plan.clientId, plan.name, plan.description, plan.dailyCalories, plan.proteinGrams, plan.carbsGrams, plan.fatGrams, plan.meals, plan.status, plan.startDate, plan.endDate],
+      function(err) {
+        if (err) {
+          console.error(`Error inserting nutrition plan:`, err.message);
+        } else {
+          planCount++;
+          if (planCount === nutritionPlans.length) {
+            console.log(`Inserted ${planCount} nutrition plans`);
+            insertNutritionLogs(professionalId);
+          }
+        }
+      }
+    );
+  });
+}
+
+// Insert sample nutrition logs
+function insertNutritionLogs(professionalId) {
+  console.log('Inserting sample nutrition logs...');
+
+  const today = new Date().toISOString().slice(0, 10);
+  
+  const nutritionLogs = [
+    { clientId: 1, date: today, mealType: 'breakfast', foodName: 'Oatmeal with protein', portionSize: '1 cup', calories: 400, protein: 30, carbs: 50, fat: 10 },
+    { clientId: 1, date: today, mealType: 'lunch', foodName: 'Grilled chicken salad', portionSize: '1 plate', calories: 500, protein: 45, carbs: 30, fat: 20 },
+    { clientId: 1, date: today, mealType: 'snack', foodName: 'Greek yogurt', portionSize: '1 container', calories: 150, protein: 15, carbs: 10, fat: 5 },
+    { clientId: 2, date: today, mealType: 'breakfast', foodName: 'Green smoothie', portionSize: '16 oz', calories: 350, protein: 20, carbs: 45, fat: 12 },
+    { clientId: 2, date: today, mealType: 'lunch', foodName: 'Quinoa bowl', portionSize: '1 bowl', calories: 550, protein: 25, carbs: 70, fat: 18 },
+    { clientId: 3, date: today, mealType: 'breakfast', foodName: 'Eggs and oatmeal', portionSize: '2 eggs + 1 cup', calories: 600, protein: 35, carbs: 60, fat: 22 },
+    { clientId: 3, date: today, mealType: 'lunch', foodName: 'Chicken and rice', portionSize: '8oz chicken + 1 cup rice', calories: 750, protein: 60, carbs: 80, fat: 20 },
+  ];
+
+  let logCount = 0;
+  nutritionLogs.forEach((log) => {
+    db.run(
+      `INSERT INTO nutrition_logs (clientId, date, mealType, foodName, portionSize, calories, protein, carbs, fat)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [log.clientId, log.date, log.mealType, log.foodName, log.portionSize, log.calories, log.protein, log.carbs, log.fat],
+      function(err) {
+        if (err) {
+          console.error(`Error inserting nutrition log:`, err.message);
+        } else {
+          logCount++;
+          if (logCount === nutritionLogs.length) {
+            console.log(`Inserted ${logCount} nutrition logs`);
+            insertNotificationPrefs(professionalId);
+          }
+        }
+      }
+    );
+  });
+}
+
+// Insert sample notification preferences
+function insertNotificationPrefs(professionalId) {
+  console.log('Inserting sample notification preferences...');
+
+  const notificationPrefs = [
+    { clientId: 1, emailEnabled: 1, whatsappEnabled: 1, telegramEnabled: 0, phone: '+254700123456', appointmentReminders: 1, progressReminders: 1, marketingMessages: 1 },
+    { clientId: 2, emailEnabled: 1, whatsappEnabled: 1, telegramEnabled: 1, phone: '+254700987654', appointmentReminders: 1, progressReminders: 1, marketingMessages: 0 },
+    { clientId: 3, emailEnabled: 1, whatsappEnabled: 0, telegramEnabled: 1, phone: '+254700555555', appointmentReminders: 1, progressReminders: 0, marketingMessages: 1 },
+    { clientId: 4, emailEnabled: 1, whatsappEnabled: 1, telegramEnabled: 0, phone: '+254700444444', appointmentReminders: 1, progressReminders: 1, marketingMessages: 1 },
+    { clientId: 5, emailEnabled: 0, whatsappEnabled: 1, telegramEnabled: 1, phone: '+254700333333', appointmentReminders: 1, progressReminders: 1, marketingMessages: 0 },
+  ];
+
+  let prefCount = 0;
+  notificationPrefs.forEach((pref) => {
+    db.run(
+      `INSERT INTO notification_prefs (clientId, emailEnabled, whatsappEnabled, telegramEnabled, phone, appointmentReminders, progressReminders, marketingMessages)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [pref.clientId, pref.emailEnabled, pref.whatsappEnabled, pref.telegramEnabled, pref.phone, pref.appointmentReminders, pref.progressReminders, pref.marketingMessages],
+      function(err) {
+        if (err) {
+          console.error(`Error inserting notification prefs:`, err.message);
+        } else {
+          prefCount++;
+          if (prefCount === notificationPrefs.length) {
+            console.log(`Inserted ${prefCount} notification preferences`);
+            console.log('✅ All sample data insertion complete!');
           }
         }
       }
@@ -668,6 +902,11 @@ function insertAnalyticsEvents(professionalId) {
 
 // Initialize
 initDatabase();
-insertSampleData();
+
+// Wait for tables to be created, then insert sample data
+setTimeout(() => {
+  console.log('Tables created, inserting sample data...');
+  insertSampleData();
+}, 1000);
 
 module.exports = db;

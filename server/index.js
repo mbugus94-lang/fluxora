@@ -589,7 +589,307 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
   }
 });
 
-// Start server
+// ============================================================================
+// NUTRITION ROUTES
+// ============================================================================
+
+// Get all nutrition plans
+app.get('/api/nutrition', authenticateToken, async (req, res) => {
+  try {
+    const { clientId } = req.query;
+    let query = 'SELECT * FROM nutrition_plans WHERE professionalId = ?';
+    let params = [req.user.id];
+    
+    if (clientId) {
+      query += ' AND clientId = ?';
+      params.push(clientId);
+    }
+    
+    query += ' ORDER BY createdAt DESC';
+    
+    const plans = await new Promise((resolve, reject) => {
+      db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+    
+    // Parse JSON fields
+    plans.forEach(plan => {
+      if (plan.meals) plan.meals = JSON.parse(plan.meals);
+    });
+    
+    res.json(plans);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single nutrition plan
+app.get('/api/nutrition/:id', authenticateToken, async (req, res) => {
+  try {
+    const plan = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM nutrition_plans WHERE id = ? AND professionalId = ?', [req.params.id, req.user.id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (!plan) {
+      return res.status(404).json({ error: 'Nutrition plan not found' });
+    }
+    
+    if (plan.meals) plan.meals = JSON.parse(plan.meals);
+    res.json(plan);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create nutrition plan
+app.post('/api/nutrition', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, name, description, dailyCalories, proteinGrams, carbsGrams, fatGrams, meals, status, startDate, endDate } = req.body;
+    
+    const result = await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO nutrition_plans (professionalId, clientId, name, description, dailyCalories, proteinGrams, carbsGrams, fatGrams, meals, status, startDate, endDate)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [req.user.id, clientId, name, description, dailyCalories, proteinGrams, carbsGrams, fatGrams, meals ? JSON.stringify(meals) : null, status || 'active', startDate, endDate],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this);
+        }
+      );
+    });
+    
+    const plan = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM nutrition_plans WHERE id = ?', [result.lastID], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (plan.meals) plan.meals = JSON.parse(plan.meals);
+    res.status(201).json(plan);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get nutrition logs
+app.get('/api/nutrition/logs/:clientId', authenticateToken, async (req, res) => {
+  try {
+    const { date } = req.query;
+    let query = 'SELECT * FROM nutrition_logs WHERE clientId = ?';
+    let params = [req.params.clientId];
+    
+    if (date) {
+      query += ' AND date = ?';
+      params.push(date);
+    }
+    
+    query += ' ORDER BY createdAt DESC';
+    
+    const logs = await new Promise((resolve, reject) => {
+      db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+    
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add nutrition log
+app.post('/api/nutrition/logs', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, date, mealType, foodName, portionSize, calories, protein, carbs, fat, notes } = req.body;
+    
+    const result = await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO nutrition_logs (clientId, date, mealType, foodName, portionSize, calories, protein, carbs, fat, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [clientId, date, mealType, foodName, portionSize, calories, protein, carbs, fat, notes],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this);
+        }
+      );
+    });
+    
+    res.status(201).json({ id: result.lastID, success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// NOTIFICATION ROUTES
+// ============================================================================
+
+// Get notification preferences
+app.get('/api/notifications/prefs/:clientId', authenticateToken, async (req, res) => {
+  try {
+    const prefs = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM notification_prefs WHERE clientId = ?', [req.params.clientId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (!prefs) {
+      // Return default preferences
+      return res.json({
+        clientId: req.params.clientId,
+        emailEnabled: true,
+        whatsappEnabled: false,
+        telegramEnabled: false,
+        appointmentReminders: true,
+        progressReminders: true,
+        marketingMessages: false
+      });
+    }
+    
+    res.json(prefs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update notification preferences
+app.put('/api/notifications/prefs/:clientId', authenticateToken, async (req, res) => {
+  try {
+    const { emailEnabled, whatsappEnabled, telegramEnabled, phone, chatId, appointmentReminders, progressReminders, marketingMessages } = req.body;
+    
+    // Check if prefs exist
+    const existing = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM notification_prefs WHERE clientId = ?', [req.params.clientId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (existing) {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE notification_prefs SET emailEnabled = ?, whatsappEnabled = ?, telegramEnabled = ?, phone = ?, chatId = ?, appointmentReminders = ?, progressReminders = ?, marketingMessages = ?, updatedAt = CURRENT_TIMESTAMP
+           WHERE clientId = ?`,
+          [emailEnabled ? 1 : 0, whatsappEnabled ? 1 : 0, telegramEnabled ? 1 : 0, phone, chatId, appointmentReminders ? 1 : 0, progressReminders ? 1 : 0, marketingMessages ? 1 : 0, req.params.clientId],
+          function(err) {
+            if (err) reject(err);
+            else resolve(this);
+          }
+        );
+      });
+    } else {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO notification_prefs (clientId, emailEnabled, whatsappEnabled, telegramEnabled, phone, chatId, appointmentReminders, progressReminders, marketingMessages)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [req.params.clientId, emailEnabled ? 1 : 0, whatsappEnabled ? 1 : 0, telegramEnabled ? 1 : 0, phone, chatId, appointmentReminders ? 1 : 0, progressReminders ? 1 : 0, marketingMessages ? 1 : 0],
+          function(err) {
+            if (err) reject(err);
+            else resolve(this);
+          }
+        );
+      });
+    }
+    
+    const prefs = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM notification_prefs WHERE clientId = ?', [req.params.clientId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    res.json(prefs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send notification (WhatsApp/Telegram simulation)
+app.post('/api/notifications/send', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, type, channel, message } = req.body;
+    
+    // Get client notification prefs
+    const prefs = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM notification_prefs WHERE clientId = ?', [clientId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (!prefs) {
+      return res.status(400).json({ error: 'Client has no notification preferences set' });
+    }
+    
+    // Check if channel is enabled
+    if (channel === 'whatsapp' && !prefs.whatsappEnabled) {
+      return res.status(400).json({ error: 'WhatsApp notifications are disabled for this client' });
+    }
+    if (channel === 'telegram' && !prefs.telegramEnabled) {
+      return res.status(400).json({ error: 'Telegram notifications are disabled for this client' });
+    }
+    if (channel === 'email' && !prefs.emailEnabled) {
+      return res.status(400).json({ error: 'Email notifications are disabled for this client' });
+    }
+    
+    // In production, this would integrate with Twilio (WhatsApp) or Telegram Bot API
+    // For demo, we simulate the notification
+    const notificationResult = {
+      success: true,
+      channel,
+      type,
+      message,
+      sentAt: new Date().toISOString(),
+      note: `[DEMO] Notification would be sent via ${channel.toUpperCase()}`
+    };
+    
+    // Log the notification
+    await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO notification_logs (clientId, type, channel, message, status, sentAt)
+         VALUES (?, ?, ?, ?, 'sent', CURRENT_TIMESTAMP)`,
+        [clientId, type, channel, message],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this);
+        }
+      );
+    });
+    
+    res.json(notificationResult);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get notification history
+app.get('/api/notifications/history/:clientId', authenticateToken, async (req, res) => {
+  try {
+    const history = await new Promise((resolve, reject) => {
+      db.all('SELECT * FROM notification_logs WHERE clientId = ? ORDER BY createdAt DESC', [req.params.clientId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+    
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// START SERVER
+// ============================================================================
+
 app.listen(PORT, () => {
   console.log(`\n🚀 Aura Platform API running on http://localhost:${PORT}`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/`);
