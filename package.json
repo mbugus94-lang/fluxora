@@ -1,0 +1,28 @@
+{
+  "name": "fluxora-service-os",
+  "version": "1.0.0",
+  "description": "Fluxora - AI-powered service business management",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js",
+    "test": "node test/demo.js"
+  },
+  "keywords": ["service", "crm", "scheduling", "invoicing", "business", "management", "ai"],
+  "author": "Aura Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
