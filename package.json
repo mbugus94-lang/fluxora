@@ -1,5 +1,5 @@
 {
-  "name": "fluxora-service-os",
+  "name": "fluxora",
   "version": "1.0.0",
   "description": "Fluxora - AI-powered service business management",
   "main": "server/index.js",
@@ -7,11 +7,21 @@
   "scripts": {
     "dev": "node server/index.js",
     "start": "node server/index.js",
-    "test": "node test/demo.js"
+    "test": "jest",
+    "lint": "eslint . --ext .js --ignore-pattern node_modules/",
+    "prepare": "npm run test"
   },
   "keywords": ["service", "crm", "scheduling", "invoicing", "business", "management", "ai"],
   "author": "Aura Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mbugus94-lang/fluxora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mbugus94-lang/fluxora/issues"
+  },
+  "homepage": "https://github.com/mbugus94-lang/fluxora#readme",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -26,6 +36,9 @@
     "multer": "^2.1.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "eslint": "^8.57.0"
   }
 }
