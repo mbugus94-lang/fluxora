@@ -46,7 +46,7 @@ See [API.md](API.md).
 
 ## Project structure
 ```
-aura-platform/
+fluxora/
 |-- public/index.html
 |-- server/index.js
 |-- server/db.js
