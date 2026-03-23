@@ -10,8 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.4] - 2026-03-23
 
 ### Changed
-- Updated jest from ^29.7.0 to ^30.3.0
-- Updated eslint from ^8.57.0 to ^10.1.0
+- Updated dependencies to latest stable versions:
+  - sqlite3: ^5.1.7 → ^6.0.1
+  - uuid: ^11.1.0 → ^13.0.0
+  - multer: ^1.4.5-lts.1 → ^2.1.1
+  - jsonwebtoken: ^9.0.2 → ^9.0.3
+  - express: ^4.21.2 → ^4.22.1
+
+## [1.0.3] - 2026-03-23
 
 ## [1.0.2] - 2026-03-23
 
