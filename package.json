@@ -1,6 +1,6 @@
 {
   "name": "fluxora",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Fluxora - AI-powered service business management",
   "main": "server/index.js",
   "type": "commonjs",
@@ -50,7 +50,7 @@
     "jest": "^30.3.0",
     "supertest": "^7.0.0",
     "eslint": "^10.1.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.5.3",
     "axios": "^1.8.4"
   }
 }
