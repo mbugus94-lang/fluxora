@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-03-23
+
+### Security
+- **CRITICAL**: Fixed password hashing in `/api/auth/register` endpoint
+  - Passwords were being stored in plaintext due to missing `password` column in INSERT statement
+  - Added bcrypt hashing with salt rounds 10
+  - Added input validation for required fields (email, name, password)
+
 ## [1.0.1] - 2026-03-22
 
 ### Added
