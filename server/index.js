@@ -74,6 +74,16 @@ function authRateLimit(req, res, next) {
   return next();
 }
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    version: require('../package.json').version
+  });
+});
+
 // Serve static frontend and uploads
 app.use(express.static('public'));
 app.use('/uploads', express.static(uploadDir));
