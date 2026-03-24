@@ -1,6 +1,6 @@
 {
   "name": "fluxora",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Fluxora - AI-powered service business management",
   "main": "server/index.js",
   "type": "commonjs",
