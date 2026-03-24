@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.6-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.7-blue" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/Node.js-18+-yellow" alt="Node.js">
   <img src="[[Image 1: unavailable (https://img.shields.io/github/actions/workflow/status/mbugus94-lang/fluxora/ci.yml)]]" alt="CI Status">
@@ -89,7 +89,7 @@ Response:
   "status": "ok",
   "timestamp": "2025-01-15T10:30:00.000Z",
   "uptime": 3600,
-  "version": "1.0.6"
+  "version": "1.0.7"
 }
 ```
 
