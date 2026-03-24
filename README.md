@@ -1,5 +1,19 @@
 # Fluxora - Service Business Management
 
+<p align="center">
+  <strong>Open-source platform for running service businesses</strong><br>
+  <em>Consulting, agencies, clinics, training, and maintenance services</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.0.5-blue" alt="Version">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/Node.js-18+-yellow" alt="Node.js">
+  <img src="https://img.shields.io/github/actions/workflow/status/mbugus94-lang/fluxora/ci.yml" alt="CI Status">
+</p>
+
+---
+
 Fluxora is an open-source platform for running service businesses across verticals like consulting, agencies, clinics, training, and maintenance services.
 
 It ships with:

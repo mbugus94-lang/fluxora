@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.5] - 2026-03-24
 
+### Added
+- **Documentation**: Added badges section to README with version, license, Node.js, and CI status
+- **Documentation**: Improved README header with centered description and badges
+
 ### Changed
 - Version bump to 1.0.5 for maintenance release
 - Updated devDependencies to latest stable versions:
