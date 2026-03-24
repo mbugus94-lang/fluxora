@@ -26,6 +26,25 @@ It ships with:
 - AI operations assistant (mock responses)
 
 ## Production-oriented updates in this build
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/mbugus94-lang/fluxora.git
+cd fluxora
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Copy the environment variables file:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 - Removed insecure demo password bypass
 - Added environment-based runtime config (`PORT`, `JWT_SECRET`, `APP_NAME`, `CORS_ORIGINS`)
 - Added auth route rate limiting
