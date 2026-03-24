@@ -21,6 +21,7 @@ if (!JWT_SECRET) {
   } else {
     // Generate a random secret for development (will change on restart)
     JWT_SECRET = crypto.randomBytes(64).toString('hex');
+    // Warn: JWT_SECRET is using the default value
     console.warn('[SECURITY] JWT_SECRET not set. Using generated development secret.');
     console.warn('[SECURITY] Set JWT_SECRET environment variable for consistent sessions.');
   }
