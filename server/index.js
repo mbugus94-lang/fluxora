@@ -74,6 +74,16 @@ function authRateLimit(req, res, next) {
   return next();
 }
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    version: require('../package.json').version
+  });
+});
+
 // Serve static frontend and uploads
 app.use(express.static('public'));
 app.use('/uploads', express.static(uploadDir));
@@ -168,6 +178,11 @@ app.post('/api/auth/register', authRateLimit, async (req, res) => {
   try {
     const { email, name, password, businessName, bio } = req.body;
 
+    // Validate required fields
+    if (!email || !name || !password) {
+      return res.status(400).json({ error: 'Email, name, and password are required' });
+    }
+
     // Check if user already exists
     const existingUser = await new Promise((resolve, reject) => {
       db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
@@ -186,8 +201,8 @@ app.post('/api/auth/register', authRateLimit, async (req, res) => {
     // Insert user
     const result = await new Promise((resolve, reject) => {
       db.run(
-        'INSERT INTO users (email, name, businessName, bio, role) VALUES (?, ?, ?, ?, ?)',
-        [email, name, businessName || '', bio || '', 'professional'],
+        'INSERT INTO users (email, name, password, businessName, bio, role) VALUES (?, ?, ?, ?, ?, ?)',
+        [email, name, hashedPassword, businessName || '', bio || '', 'professional'],
         function(err) {
           if (err) reject(err);
           else resolve(this);
@@ -655,7 +670,6 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 // ============================================================================
 // DOCUMENT UPLOAD ROUTES
 // ============================================================================

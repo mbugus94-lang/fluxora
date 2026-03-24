@@ -32,6 +32,24 @@ Demo credentials:
 - Email: `demo@aura.com`
 - Password: `demo123`
 
+## 🔍 Health Checks
+
+The API includes a health check endpoint for monitoring:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-01-15T10:30:00.000Z",
+  "uptime": 3600,
+  "version": "1.0.5"
+}
+```
+
 ## Environment configuration
 Copy `.env.example` values into your environment:
 
@@ -46,7 +64,7 @@ See [API.md](API.md).
 
 ## Project structure
 ```
-aura-platform/
+fluxora/
 |-- public/index.html
 |-- server/index.js
 |-- server/db.js

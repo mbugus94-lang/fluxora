@@ -1,14 +1,17 @@
 {
   "name": "fluxora",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Fluxora - AI-powered service business management",
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {
     "dev": "node server/index.js",
     "start": "node server/index.js",
-    "test": "jest",
-    "lint": "eslint . --ext .js --ignore-pattern node_modules/"
+    "test": "jest __tests__/",
+    "test:integration": "node test.js",
+    "lint": "eslint . --ext .js --ignore-pattern node_modules/",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "service",
@@ -19,7 +22,7 @@
     "management",
     "ai"
   ],
-  "author": "Aura Team",
+  "author": "Fluxora Team",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -33,7 +36,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "express": "^5.2.1",
+    "express": "^4.22.1",
     "cors": "^2.8.6",
     "helmet": "^8.1.0",
     "bcryptjs": "^3.0.3",
@@ -44,9 +47,10 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
-    "jest": "^29.7.0",
+    "jest": "^30.3.0",
     "supertest": "^7.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^10.1.0",
+    "prettier": "^3.5.3",
     "axios": "^1.8.4"
   }
 }
