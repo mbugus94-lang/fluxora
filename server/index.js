@@ -7,19 +7,30 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const db = require('./db');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'aura-demo-secret-key-change-in-production';
+
+// Secure JWT secret handling
+let JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('[FATAL] JWT_SECRET environment variable is required in production');
+    process.exit(1);
+  } else {
+    // Generate a random secret for development (will change on restart)
+    JWT_SECRET = crypto.randomBytes(64).toString('hex');
+    console.warn('[SECURITY] JWT_SECRET not set. Using generated development secret.');
+    console.warn('[SECURITY] Set JWT_SECRET environment variable for consistent sessions.');
+  }
+}
+
 const APP_NAME = process.env.APP_NAME || 'Fluxora';
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
-
-if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'aura-demo-secret-key-change-in-production') {
-  console.warn('[SECURITY] JWT_SECRET is using the default value. Set JWT_SECRET in production.');
-}
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
