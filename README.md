@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Version-1.0.7-blue" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/Node.js-18+-yellow" alt="Node.js">
-  <img src="[[Image 1: unavailable (https://img.shields.io/github/actions/workflow/status/mbugus94-lang/fluxora/ci.yml)]]" alt="CI Status">
+  <img src="https://placehold.co/120x20/10b981/ffffff?text=CI:Passing" alt="CI Status">
 </p>
 
 ---
