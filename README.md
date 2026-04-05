@@ -14,6 +14,16 @@
 
 ---
 
+## 🎬 Demo
+
+![Fluxora Platform Architecture](docs/fluxora-platform-demo.png)
+
+**Platform Overview:** Fluxora is a full-stack service business management platform with an Express.js REST API, SQLite database, responsive web UI with theme toggle, and six core modules: Client CRM, Appointment Scheduling, Service Delivery Notes, Program/Package Management, Invoicing System, and AI Operations Assistant with mock AI responses for business queries.
+
+📖 **[View Full Demo Guide](DEMO.md)** - Complete API walkthrough, dashboard preview, and usage examples
+
+---
+
 Fluxora is an open-source platform for running service businesses across verticals like consulting, agencies, clinics, training, and maintenance services.
 
 ## ✨ Features
